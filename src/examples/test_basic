@@ -1,0 +1,10 @@
+topology = torus;
+k = 4;
+n = 2;
+routing_function = dim_order;
+num_vcs = 4;
+traffic = uniform;
+injection_rate = 0.1;
+sim_type = latency;
+sample_period = 100;
+max_samples = 1;

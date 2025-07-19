@@ -1,0 +1,34 @@
+// Test configuration for 5D Unidirectional Torus
+// Shows how clean the interface is for higher dimensions
+
+// Topology
+topology = unitorus;
+dim_sizes = "4,4,3,3,2";   // 5-dimensional torus: 4x4x3x3x2
+
+// Direction-specific configuration  
+dim_bandwidth = "4,3,2,2,1";   // Different bandwidth per dimension
+dim_latency = "1,1,2,2,3";     // Different latency per dimension
+dim_penalty = "0,1,2,3,5";     // Different penalty per dimension
+
+// Routing
+routing_function = dim_order_unitorus;
+
+// Flow control
+num_vcs = 16;
+vc_buf_size = 32;
+wait_for_tail_credit = 1;
+
+// Router architecture
+vc_allocator = islip;
+sw_allocator = islip;
+alloc_iters  = 1;
+
+// Traffic
+traffic = uniform;
+injection_rate = 0.01;  // Lower rate for higher dimensional network
+
+// Simulation
+sim_type = latency;
+warmup_periods = 3;
+sample_period = 1000;
+max_samples = 5;

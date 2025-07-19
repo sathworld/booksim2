@@ -1,0 +1,34 @@
+// Test configuration for Unidirectional Torus
+// 4x6 torus with different bandwidths and latencies per dimension
+
+// Topology
+topology = unitorus;
+dim_sizes = "4,6";     // 4 nodes in dimension 0, 6 nodes in dimension 1
+
+// Direction-specific configuration
+dim_bandwidth = "2,1";     // Dimension 0: 2x bandwidth, Dimension 1: 1x bandwidth
+dim_latency = "1,2";       // Dimension 0: 1 cycle, Dimension 1: 2 cycles
+dim_penalty = "0,5";       // Dimension 0: no penalty, Dimension 1: 5 cycle penalty
+
+// Routing
+routing_function = dim_order_unitorus;
+
+// Flow control
+num_vcs = 4;
+vc_buf_size = 8;
+wait_for_tail_credit = 1;
+
+// Router architecture
+vc_allocator = islip;
+sw_allocator = islip;
+alloc_iters  = 1;
+
+// Traffic
+traffic = uniform;
+injection_rate = 0.1;
+
+// Simulation
+sim_type = latency;
+warmup_periods = 3;
+sample_period = 1000;
+max_samples = 10;

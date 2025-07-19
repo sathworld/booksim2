@@ -45,4 +45,8 @@ extern int gWriteReqBeginVC, gWriteReqEndVC;
 extern int gReadReplyBeginVC, gReadReplyEndVC;
 extern int gWriteReplyBeginVC, gWriteReplyEndVC;
 
+// Unidirectional torus routing function
+void dim_order_unitorus( const Router *r, const Flit *f, int in_channel, 
+                         OutputSet *outputs, bool inject );
+
 #endif

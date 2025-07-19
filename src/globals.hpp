@@ -46,6 +46,9 @@ extern int gC;
 
 extern int gNodes;
 
+// Global dimension sizes for variable-size torus
+extern std::vector<int> gDimSizes;
+
 extern bool gTrace;
 
 extern std::ostream * gWatchOut;

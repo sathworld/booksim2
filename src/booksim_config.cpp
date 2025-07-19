@@ -52,6 +52,14 @@ BookSimConfig::BookSimConfig( )
   _int_map["k"] = 8; //network radix
   _int_map["n"] = 2; //network dimension
   _int_map["c"] = 1; //concentration
+  
+  // Unidirectional torus parameters
+  AddStrField( "dim_sizes", "" );      // dimension sizes (comma-separated)
+  AddStrField( "dim_bandwidth", "" );  // per-dimension bandwidth (comma-separated)
+  AddStrField( "dim_latency", "" );    // per-dimension latency (comma-separated)
+  AddStrField( "dim_penalty", "" );    // per-dimension penalty (comma-separated)
+  _int_map["unitorus_debug"] = 0;      // enable debug output for UniTorus
+  
   AddStrField( "routing_function", "none" );
 
   //simulator tries to correclty adjust latency for node/router placement 

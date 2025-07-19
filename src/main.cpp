@@ -85,6 +85,9 @@ int gC;//concentration
 
 int gNodes;
 
+//global dimension sizes for variable-size torus
+vector<int> gDimSizes;
+
 //generate nocviewer trace
 bool gTrace;
 

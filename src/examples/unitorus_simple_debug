@@ -1,0 +1,31 @@
+// Simple 2x2 UniTorus test
+topology = unitorus;
+dim_sizes = {2,2};
+
+// Basic direction config  
+dim_bandwidth = {1,1};
+dim_latency = {1,1};
+dim_penalty = {0,0};
+
+// Routing
+routing_function = dim_order_unitorus;
+
+// Flow control
+num_vcs = 4;
+vc_buf_size = 8;
+
+// Router architecture
+vc_allocator = islip;
+sw_allocator = islip;
+
+// Traffic
+traffic = uniform;
+injection_rate = 0.01;
+
+// Simulation
+sim_type = latency;
+sample_period = 100;
+max_samples = 1;
+
+// Enable debug output
+unitorus_debug = 1;

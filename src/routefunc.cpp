@@ -1914,6 +1914,100 @@ void chaos_mesh( const Router *r, const Flit *f,
 
 //=============================================================
 
+void dim_order_unitorus( const Router *r, const Flit *f, int in_channel, 
+                         OutputSet *outputs, bool inject )
+{
+  int vcBegin = 0, vcEnd = gNumVCs-1;
+  if ( f->type == Flit::READ_REQUEST ) {
+    vcBegin = gReadReqBeginVC;
+    vcEnd = gReadReqEndVC;
+  } else if ( f->type == Flit::WRITE_REQUEST ) {
+    vcBegin = gWriteReqBeginVC;
+    vcEnd = gWriteReqEndVC;
+  } else if ( f->type ==  Flit::READ_REPLY ) {
+    vcBegin = gReadReplyBeginVC;
+    vcEnd = gReadReplyEndVC;
+  } else if ( f->type ==  Flit::WRITE_REPLY ) {
+    vcBegin = gWriteReplyBeginVC;
+    vcEnd = gWriteReplyEndVC;
+  }
+  assert(((f->vc >= vcBegin) && (f->vc <= vcEnd)) || (inject && (f->vc < 0)));
+
+  int out_port;
+
+  if(inject) {
+    out_port = -1;
+  } else {
+    int cur = r->GetID();
+    int dest = f->dest;
+
+    // Find first dimension that needs routing
+    int dim_to_route = -1;
+    for (int dim = 0; dim < gN; ++dim) {
+      // Calculate current and destination coordinates for this dimension
+      int divisor = 1;
+      for (int d = 0; d < dim; ++d) {
+        divisor *= gDimSizes[d];
+      }
+      
+      int cur_coord = (cur / divisor) % gDimSizes[dim];
+      int dest_coord = (dest / divisor) % gDimSizes[dim];
+      
+      if (cur_coord != dest_coord) {
+        dim_to_route = dim;
+        break;
+      }
+    }
+
+    if (dim_to_route >= 0) {
+      // In unidirectional torus, we can only move in positive direction
+      // If destination is "behind" us, we need to go the long way around
+      int divisor = 1;
+      for (int d = 0; d < dim_to_route; ++d) {
+        divisor *= gDimSizes[d];
+      }
+      
+      int cur_coord = (cur / divisor) % gDimSizes[dim_to_route];
+      int dest_coord = (dest / divisor) % gDimSizes[dim_to_route];
+      
+      // Always route in positive direction (dimension number is the port)
+      out_port = dim_to_route;
+      
+      // Apply virtual channel partitioning for deadlock avoidance
+      // Use different VC sets based on whether we're wrapping around
+      if (cur_coord < dest_coord) {
+        // Direct path (no wraparound)
+        // Use first half of VCs
+        vcEnd = vcBegin + (vcEnd - vcBegin) / 2;
+      } else {
+        // Wraparound path (cur > dest, going the long way)
+        // Use second half of VCs
+        vcBegin = vcBegin + (vcEnd - vcBegin + 1) / 2;
+      }
+    } else {
+      // At destination
+      out_port = gN; // Eject port
+    }
+
+    if (f->watch) {
+      *gWatchOut << GetSimTime() << " | " << r->FullName() << " | "
+                 << "Unidirectional DOR: Adding VC range [" 
+                 << vcBegin << "," 
+                 << vcEnd << "]"
+                 << " at output port " << out_port
+                 << " for flit " << f->id
+                 << " (input port " << in_channel
+                 << ", destination " << f->dest << ")"
+                 << "." << endl;
+    }
+  }
+ 
+  outputs->Clear();
+  outputs->AddRange(out_port, vcBegin, vcEnd);
+}
+
+//=============================================================
+
 void InitializeRoutingMap( const Configuration & config )
 {
 
