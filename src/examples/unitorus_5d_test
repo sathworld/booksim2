@@ -3,12 +3,12 @@
 
 // Topology
 topology = unitorus;
-dim_sizes = "4,4,3,3,2";   // 5-dimensional torus: 4x4x3x3x2
+dim_sizes = {4,4,3,3,2};   // 5-dimensional torus: 4x4x3x3x2
 
 // Direction-specific configuration  
-dim_bandwidth = "4,3,2,2,1";   // Different bandwidth per dimension
-dim_latency = "1,1,2,2,3";     // Different latency per dimension
-dim_penalty = "0,1,2,3,5";     // Different penalty per dimension
+dim_bandwidth = {4,3,2,2,1};   // Different bandwidth per dimension
+dim_latency = {1,1,2,2,3};     // Different latency per dimension
+dim_penalty = {0.0,1.5,2.5,3.0,5.0};     // Different penalty per dimension (floats)
 
 // Routing
 routing_function = dim_order_unitorus;

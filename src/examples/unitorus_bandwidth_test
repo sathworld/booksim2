@@ -1,0 +1,17 @@
+// Test bandwidth-aware routing
+// Higher bandwidth dimension should be preferred for routing
+
+topology = unitorus;
+dim_sizes = 4,4;           // 4x4 torus
+dim_bandwidth = 4,1;       // Dimension 0: 4x bandwidth, Dimension 1: 1x bandwidth  
+dim_penalty = 0.0,0.0;     // Equal penalties to isolate bandwidth effect
+dim_latency = 1,1;
+
+routing_function = dim_order_unitorus;
+
+traffic = uniform;
+injection_rate = 0.05;
+packet_size = 1;
+
+sim_type = latency;
+max_samples = 10000;

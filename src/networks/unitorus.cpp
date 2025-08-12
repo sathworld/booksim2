@@ -93,9 +93,12 @@ void UniTorus::_ComputeSize( const Configuration &config )
   gN = _dim_sizes.size();
   gK = _dim_sizes[0]; // Use first dimension as default for legacy compatibility
   gDimSizes = _dim_sizes; // Set global dimension sizes for routing functions
+  gDimPenalties = _dim_penalty; // Set global dimension penalties for routing functions
+  gDimBandwidths = _dim_bandwidth; // Set global dimension bandwidths for routing functions
   
-  // Unidirectional: only n channels per node (one per dimension)
-  _channels = _dim_sizes.size() * _size;
+  // Calculate channels after bandwidth is parsed
+  // We'll update this in _ParseDirectionConfig()
+  _channels = 0; // Temporary, will be calculated later
 
   _nodes = _size;
   
@@ -116,7 +119,7 @@ void UniTorus::_ParseDirectionConfig( const Configuration &config )
   // Initialize vectors for each dimension
   _dim_bandwidth.resize(num_dims, 1);  // Default bandwidth = 1
   _dim_latency.resize(num_dims, 1);    // Default latency = 1
-  _dim_penalty.resize(num_dims, 0);    // Default penalty = 0
+  _dim_penalty.resize(num_dims, 0.0);    // Default penalty = 0
 
   // Helper function to parse and validate comma-separated values
   auto parseAndValidate = [num_dims](const string& param_str, const string& param_name) -> vector<int> {
@@ -230,11 +233,68 @@ void UniTorus::_ParseDirectionConfig( const Configuration &config )
     return values;
   };
 
+  // Helper function for penalty parsing (allows zero, returns float)
+  auto parseAndValidatePenaltyFloat = [num_dims](const string& param_str, const string& param_name) -> vector<float> {
+    vector<float> values;
+    if (param_str.empty() || param_str == "0") {
+      return values; // Return empty vector for default handling
+    }
+    
+    // Remove braces if present (config parser format: {val1,val2,val3})
+    string clean_str = param_str;
+    if (!clean_str.empty() && clean_str.front() == '{') {
+      clean_str = clean_str.substr(1);
+    }
+    if (!clean_str.empty() && clean_str.back() == '}') {
+      clean_str = clean_str.substr(0, clean_str.length() - 1);
+    }
+    
+    vector<string> tokens;
+    size_t start = 0, end = 0;
+    while ((end = clean_str.find(',', start)) != string::npos) {
+      string token = clean_str.substr(start, end - start);
+      // Trim whitespace
+      token.erase(0, token.find_first_not_of(" \t"));
+      token.erase(token.find_last_not_of(" \t") + 1);
+      if (!token.empty()) {
+        tokens.push_back(token);
+      }
+      start = end + 1;
+    }
+    string last_token = clean_str.substr(start);
+    last_token.erase(0, last_token.find_first_not_of(" \t"));
+    last_token.erase(last_token.find_last_not_of(" \t") + 1);
+    if (!last_token.empty()) {
+      tokens.push_back(last_token);
+    }
+    
+    // Validate count matches number of dimensions
+    if ((int)tokens.size() != num_dims) {
+      cerr << "Error: " << param_name << " has " << tokens.size() 
+           << " values but topology has " << num_dims << " dimensions." << endl;
+      cerr << "Expected format: " << param_name << " = {val1,val2,...,val" << num_dims << "}" << endl;
+      exit(-1);
+    }
+    
+    // Convert to floats and validate (allow zero for penalties)
+    for (const string& token : tokens) {
+      float val = atof(token.c_str());
+      if (val < 0.0f) {
+        cerr << "Error: All values in " << param_name << " must be non-negative numbers. Found: " << token << endl;
+        exit(-1);
+      }
+      values.push_back(val);
+    }
+    
+    return values;
+  };
+
   // Parse and validate bandwidth
   string bandwidth_str = config.GetStr("dim_bandwidth");
   vector<int> bandwidth_values = parseAndValidate(bandwidth_str, "dim_bandwidth");
   if (!bandwidth_values.empty()) {
     _dim_bandwidth = bandwidth_values;
+    gDimBandwidths = _dim_bandwidth; // Update global for routing functions
   }
 
   // Parse and validate latency
@@ -246,10 +306,15 @@ void UniTorus::_ParseDirectionConfig( const Configuration &config )
 
   // Parse and validate penalty (allows zero)
   string penalty_str = config.GetStr("dim_penalty");
-  vector<int> penalty_values = parseAndValidatePenalty(penalty_str, "dim_penalty");
+  vector<float> penalty_values = parseAndValidatePenaltyFloat(penalty_str, "dim_penalty");
   if (!penalty_values.empty()) {
     _dim_penalty = penalty_values;
+    gDimPenalties = _dim_penalty; // Update global for routing functions
   }
+
+  // Calculate total channels - one per dimension per node
+  // Bandwidth will affect channel capacity, not number of channels
+  _channels = _dim_sizes.size() * _size;
 
   // Print configuration
   if (_debug) {
@@ -260,6 +325,7 @@ void UniTorus::_ParseDirectionConfig( const Configuration &config )
            << ", latency=" << _dim_latency[i] 
            << ", penalty=" << _dim_penalty[i] << endl;
     }
+    cout << "Total channels: " << _channels << endl;
   }
 }
 
@@ -381,7 +447,8 @@ void UniTorus::_BuildNet( const Configuration &config )
 
 int UniTorus::_NextChannel( int node, int dim )
 {
-  // Channel numbering: node * num_dimensions + dim
+  // Calculate the channel index for a given node and dimension
+  // Each node has one channel per dimension, bandwidth affects capacity
   return node * _dim_sizes.size() + dim;
 }
 
@@ -441,7 +508,7 @@ int UniTorus::GetDimLatency( int dim ) const
   return _dim_latency[dim];
 }
 
-int UniTorus::GetDimPenalty( int dim ) const
+float UniTorus::GetDimPenalty( int dim ) const
 {
   return _dim_penalty[dim];
 }
@@ -451,7 +518,7 @@ double UniTorus::Capacity( ) const
   // Calculate total capacity considering per-dimension bandwidths
   double total_capacity = 0.0;
   for ( int dim = 0; dim < (int)_dim_sizes.size(); ++dim ) {
-    total_capacity += (double)(_size * _dim_bandwidth[dim]) / (double)_size;
+    total_capacity += (double)_dim_bandwidth[dim];
   }
   return total_capacity;
 }

@@ -1,0 +1,32 @@
+// Test penalty-aware routing in 2D UniTorus
+// High penalty on dim 1 should make routing prefer dim 0
+
+topology = unitorus;
+dim_sizes = {4,4};         // 4x4 torus
+
+// Make dimension 1 very expensive to use
+dim_bandwidth = {1,1};
+dim_latency = {1,1};
+dim_penalty = {0.0,10.0};  // Dim 0: no penalty, Dim 1: 10.0 penalty
+
+routing_function = dim_order_unitorus;
+
+// Flow control
+num_vcs = 8;
+vc_buf_size = 16;
+
+// Router architecture
+vc_allocator = islip;
+sw_allocator = islip;
+
+// Traffic
+traffic = uniform;
+injection_rate = 0.02;
+
+// Simulation
+sim_type = latency;
+sample_period = 500;
+max_samples = 3;
+
+// Enable debug to see penalties
+unitorus_debug = 1;

@@ -1941,8 +1941,10 @@ void dim_order_unitorus( const Router *r, const Flit *f, int in_channel,
     int cur = r->GetID();
     int dest = f->dest;
 
-    // Find first dimension that needs routing
+    // Find dimension with lowest cost that needs routing (penalty-aware routing)
     int dim_to_route = -1;
+    float min_cost = -1.0f;
+    
     for (int dim = 0; dim < gN; ++dim) {
       // Calculate current and destination coordinates for this dimension
       int divisor = 1;
@@ -1954,8 +1956,27 @@ void dim_order_unitorus( const Router *r, const Flit *f, int in_channel,
       int dest_coord = (dest / divisor) % gDimSizes[dim];
       
       if (cur_coord != dest_coord) {
-        dim_to_route = dim;
-        break;
+        // This dimension needs routing - calculate routing cost
+        
+        // Calculate distance in this dimension
+        int distance;
+        if (cur_coord < dest_coord) {
+          distance = dest_coord - cur_coord; // Direct path
+        } else {
+          distance = gDimSizes[dim] - cur_coord + dest_coord; // Wraparound path
+        }
+        
+        // Total cost = base distance + penalty - bandwidth bonus
+        // Higher bandwidth makes dimension more attractive (lower cost)
+        float penalty = (dim < (int)gDimPenalties.size()) ? gDimPenalties[dim] : 0.0f;
+        float bandwidth_bonus = (dim < (int)gDimBandwidths.size()) ? (float)gDimBandwidths[dim] - 1.0f : 0.0f;
+        float cost = (float)distance + penalty - bandwidth_bonus;
+        
+        // Choose dimension with lowest cost (or first one if costs are equal)
+        if (dim_to_route < 0 || cost < min_cost) {
+          dim_to_route = dim;
+          min_cost = cost;
+        }
       }
     }
 

@@ -13,7 +13,7 @@ class UniTorus : public Network {
   // Direction-specific properties
   vector<int> _dim_bandwidth;
   vector<int> _dim_latency;
-  vector<int> _dim_penalty;
+  vector<float> _dim_penalty;
   
   // Debug flag
   bool _debug;
@@ -38,7 +38,7 @@ public:
   int GetDimSize( int dim ) const;
   const vector<int>& GetDimSizes( ) const;
   int GetDimLatency( int dim ) const;
-  int GetDimPenalty( int dim ) const;
+  float GetDimPenalty( int dim ) const;
 
   double Capacity( ) const;
 

@@ -49,6 +49,12 @@ extern int gNodes;
 // Global dimension sizes for variable-size torus
 extern std::vector<int> gDimSizes;
 
+// Global dimension penalties for routing cost calculation
+extern std::vector<float> gDimPenalties;
+
+// Global dimension bandwidths for routing cost calculation  
+extern std::vector<int> gDimBandwidths;
+
 extern bool gTrace;
 
 extern std::ostream * gWatchOut;

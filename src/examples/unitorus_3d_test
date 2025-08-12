@@ -1,21 +1,14 @@
-// // Topology
+// Test configuration for 3D Unidirectional Torus
+// 4x3x2 torus with different properties per dimension
+
+// Topology
 topology = unitorus;
 dim_sizes = {4,3,2};       // 4x3x2 torus
 
 // Direction-specific configuration
 dim_bandwidth = {3,2,1};   // Dim 0: 3x, Dim 1: 2x, Dim 2: 1x bandwidth
-dim_latency = {1,2,3};     // Dim 0: 1 cycle, Dim 1: 2 cycles, Dim 2: 3 cycles
-dim_penalty = {0,2,5};     // Dim 0: no penalty, Dim 1: 2 cycles, Dim 2: 5 cyclesfiguration for 3D Unidirectional Torus
-// 4x3x2 torus with different properties per dimension
-
-// Topology
-topology = unitorus;
-dim_sizes = "4,3,2";       // 4x3x2 torus
-
-// Direction-specific configuration
-dim_bandwidth = "3,2,1";   // Dim 0: 3x, Dim 1: 2x, Dim 2: 1x bandwidth
-dim_latency = "1,2,3";     // Dim 0: 1 cycle, Dim 1: 2 cycles, Dim 2: 3 cycles
-dim_penalty = "0,2,5";     // Dim 0: no penalty, Dim 1: 2 cycles, Dim 2: 5 cycles
+dim_latency = {3,3,3};     // Dim 0: 1 cycle, Dim 1: 2 cycles, Dim 2: 3 cycles
+dim_penalty = {0,2,5};     // Dim 0: no penalty, Dim 1: 2 cycles, Dim 2: 5 cycles
 
 // Routing
 routing_function = dim_order_unitorus;

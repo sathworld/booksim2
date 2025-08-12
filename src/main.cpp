@@ -86,7 +86,10 @@ int gC;//concentration
 int gNodes;
 
 //global dimension sizes for variable-size torus
+// Global dimension sizes and penalties for variable-size networks
 vector<int> gDimSizes;
+vector<float> gDimPenalties;
+vector<int> gDimBandwidths;
 
 //generate nocviewer trace
 bool gTrace;
