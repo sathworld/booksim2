@@ -72,6 +72,13 @@ protected:
   vector<CreditChannel *> _output_credits;
   vector<bool>            _channel_faults;
 
+  // Optional topology-specific metadata (used by Cake routing, not global)
+  int _cake_x_size = 0, _cake_y_size = 0, _cake_layers = 0;
+  int _cake_x = -1, _cake_y = -1, _cake_z = -1; // coordinates
+  int _cake_elvx = -1, _cake_elvy = -1; // preferred elevator target for this (x,y)
+  int _cake_port_xp = -1, _cake_port_yp = -1, _cake_port_zup = -1, _cake_port_zdn = -1;
+  int _cake_port_eject = -1;
+
 #ifdef TRACK_FLOWS
   vector<vector<int> > _received_flits;
   vector<vector<int> > _stored_flits;
@@ -101,6 +108,8 @@ public:
 
   virtual void AddInputChannel( FlitChannel *channel, CreditChannel *backchannel );
   virtual void AddOutputChannel( FlitChannel *channel, CreditChannel *backchannel );
+  // Current number of output ports (after dynamic additions)
+  int OutputIndexCount() const { return (int)_output_channels.size(); }
  
   inline FlitChannel * GetInputChannel( int input ) const {
     assert((input >= 0) && (input < _inputs));
@@ -111,6 +120,29 @@ public:
     return _output_channels[output];
   }
 
+  // Cake metadata setters/getters
+  inline void SetCakeSizes(int xs, int ys, int ls){ _cake_x_size=xs; _cake_y_size=ys; _cake_layers=ls; }
+  inline void SetCakeXYZ(int x, int y, int z){ _cake_x=x; _cake_y=y; _cake_z=z; }
+  inline void SetCakeElevatorTarget(int ex, int ey){ _cake_elvx=ex; _cake_elvy=ey; }
+  inline void SetCakePortXPlus(int p){ _cake_port_xp=p; }
+  inline void SetCakePortYPlus(int p){ _cake_port_yp=p; }
+  inline void SetCakePortZUp(int p){ _cake_port_zup=p; }
+  inline void SetCakePortZDown(int p){ _cake_port_zdn=p; }
+  inline void SetCakePortEject(int p){ _cake_port_eject=p; }
+  inline int CakeXSize() const { return _cake_x_size; }
+  inline int CakeYSize() const { return _cake_y_size; }
+  inline int CakeLayers() const { return _cake_layers; }
+  inline int CakeX() const { return _cake_x; }
+  inline int CakeY() const { return _cake_y; }
+  inline int CakeZ() const { return _cake_z; }
+  inline int CakeElevX() const { return _cake_elvx; }
+  inline int CakeElevY() const { return _cake_elvy; }
+  inline int CakePortXPlus() const { return _cake_port_xp; }
+  inline int CakePortYPlus() const { return _cake_port_yp; }
+  inline int CakePortZUp() const { return _cake_port_zup; }
+  inline int CakePortZDown() const { return _cake_port_zdn; }
+  inline int CakePortEject() const { return _cake_port_eject; }
+
   virtual void ReadInputs( ) = 0;
   virtual void Evaluate( );
   virtual void WriteOutputs( ) = 0;
@@ -119,6 +151,21 @@ public:
   bool IsFaultyOutput( int c ) const;
 
   inline int GetID( ) const {return _id;}
+
+  // Cake metadata API
+  void SetCakeSizes(int xs, int ys, int ls); // defined inline below
+  void SetCakeXYZ(int x, int y, int z);
+  void SetCakeElevatorTarget(int ex, int ey);
+  void SetCakePortXPlus(int p);
+  void SetCakePortYPlus(int p);
+  void SetCakePortZUp(int p);
+  void SetCakePortZDown(int p);
+  void SetCakePortEject(int p);
+  int CakeXSize() const; int CakeYSize() const; int CakeLayers() const;
+  int CakeX() const; int CakeY() const; int CakeZ() const;
+  int CakeElevX() const; int CakeElevY() const;
+  int CakePortXPlus() const; int CakePortYPlus() const; int CakePortZUp() const; int CakePortZDown() const; int CakePortEject() const;
+  int OutputIndexCount() const;
 
 
   virtual int GetUsedCredit(int o) const = 0;
@@ -198,5 +245,29 @@ public:
   inline int NumInputs() const {return _inputs;}
   inline int NumOutputs() const {return _outputs;}
 };
+
+// Inline implementations for Cake metadata to avoid additional .cpp dependencies
+inline void Router::SetCakeSizes(int xs, int ys, int ls){ _cake_x_size=xs; _cake_y_size=ys; _cake_layers=ls; }
+inline void Router::SetCakeXYZ(int x, int y, int z){ _cake_x=x; _cake_y=y; _cake_z=z; }
+inline void Router::SetCakeElevatorTarget(int ex, int ey){ _cake_elvx=ex; _cake_elvy=ey; }
+inline void Router::SetCakePortXPlus(int p){ _cake_port_xp=p; }
+inline void Router::SetCakePortYPlus(int p){ _cake_port_yp=p; }
+inline void Router::SetCakePortZUp(int p){ _cake_port_zup=p; }
+inline void Router::SetCakePortZDown(int p){ _cake_port_zdn=p; }
+inline void Router::SetCakePortEject(int p){ _cake_port_eject=p; }
+inline int Router::CakeXSize() const { return _cake_x_size; }
+inline int Router::CakeYSize() const { return _cake_y_size; }
+inline int Router::CakeLayers() const { return _cake_layers; }
+inline int Router::CakeX() const { return _cake_x; }
+inline int Router::CakeY() const { return _cake_y; }
+inline int Router::CakeZ() const { return _cake_z; }
+inline int Router::CakeElevX() const { return _cake_elvx; }
+inline int Router::CakeElevY() const { return _cake_elvy; }
+inline int Router::CakePortXPlus() const { return _cake_port_xp; }
+inline int Router::CakePortYPlus() const { return _cake_port_yp; }
+inline int Router::CakePortZUp() const { return _cake_port_zup; }
+inline int Router::CakePortZDown() const { return _cake_port_zdn; }
+inline int Router::CakePortEject() const { return _cake_port_eject; }
+inline int Router::OutputIndexCount() const { return (int)_output_channels.size(); }
 
 #endif

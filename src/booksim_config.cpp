@@ -53,12 +53,19 @@ BookSimConfig::BookSimConfig( )
   _int_map["n"] = 2; //network dimension
   _int_map["c"] = 1; //concentration
   
-  // Unidirectional torus parameters
-  AddStrField( "dim_sizes", "" );      // dimension sizes (comma-separated)
+  // Common dimension parameters (used by UniTorus, Cake, ...)
+  AddStrField( "dim_sizes", "" );      // dimension sizes (comma-separated), e.g., {x,y[,layers]}
   AddStrField( "dim_bandwidth", "" );  // per-dimension bandwidth (comma-separated)
   AddStrField( "dim_latency", "" );    // per-dimension latency (comma-separated)
   AddStrField( "dim_penalty", "" );    // per-dimension penalty (comma-separated)
   _int_map["unitorus_debug"] = 0;      // enable debug output for UniTorus
+  // Cake topology parameters
+  _int_map["layers"] = 1;              // number of layers (Z); Cake also reads layers from dim_sizes
+  AddStrField( "elevator_coords", "" );          // list of (x,y) with elevators (preferred key)
+  AddStrField( "elevator_mapping_coords", "" );  // Y rows of X pairs: preferred elevator per (x,y) (preferred key)
+  // Legacy compatibility keys (recognized by Cake in code):
+  AddStrField( "elevatormapping", "" );
+  AddStrField( "elevatorcoords", "" );
   
   AddStrField( "routing_function", "none" );
 

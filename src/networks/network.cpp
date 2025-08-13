@@ -48,6 +48,7 @@
 #include "anynet.hpp"
 #include "dragonfly.hpp"
 #include "unitorus.hpp"
+#include "cake.hpp"
 
 
 Network::Network( const Configuration &config, const string & name ) :
@@ -115,6 +116,9 @@ Network * Network::New(const Configuration & config, const string & name)
   } else if ( topo == "unitorus"){
     UniTorus::RegisterRoutingFunctions() ;
     n = new UniTorus(config, name);
+  } else if ( topo == "cake"){
+    Cake::RegisterRoutingFunctions();
+    n = new Cake(config, name);
   } else {
     cerr << "Unknown topology: " << topo << endl;
   }
